@@ -11,6 +11,7 @@ const WORD_CATEGORIES = {
 
 const GAME_PHASES = {
   SETUP: 'setup',
+  PLAYER_READY: 'player_ready',
   WORD_REVEAL: 'word_reveal',
   TIMER: 'timer',
   VOTING: 'voting',
@@ -66,7 +67,7 @@ function App() {
       
       setGameWord(randomWord);
       setImposterIndex(randomImposter);
-      setGamePhase(GAME_PHASES.WORD_REVEAL);
+      setGamePhase(GAME_PHASES.PLAYER_READY);
       setCurrentRevealIndex(0);
       
       // Initialize voting state
@@ -81,9 +82,14 @@ function App() {
     }
   };
 
+  const showPlayerWord = () => {
+    setGamePhase(GAME_PHASES.WORD_REVEAL);
+  };
+
   const nextPlayerReveal = () => {
     if (currentRevealIndex < players.length - 1) {
       setCurrentRevealIndex(currentRevealIndex + 1);
+      setGamePhase(GAME_PHASES.PLAYER_READY);
     } else {
       setGamePhase(GAME_PHASES.TIMER);
     }
@@ -202,11 +208,28 @@ function App() {
           </div>
         )}
 
+        {gamePhase === GAME_PHASES.PLAYER_READY && (
+          <div>
+            <h2 className="phase-title">Get Ready</h2>
+            <p style={{fontSize: '1.2em', marginBottom: '30px'}}>
+              Showing word for: <strong style={{color: '#667eea'}}>{players[currentRevealIndex]}</strong>
+            </p>
+            <p>Player {currentRevealIndex + 1} of {players.length}</p>
+            <p style={{color: '#666', marginBottom: '40px'}}>
+              Make sure only <strong>{players[currentRevealIndex]}</strong> can see the screen, then click "Show Word"
+            </p>
+            
+            <button className="btn btn-primary" onClick={showPlayerWord}>
+              Show Word
+            </button>
+          </div>
+        )}
+
         {gamePhase === GAME_PHASES.WORD_REVEAL && (
           <div>
-            <h2 className="phase-title">Word Reveal</h2>
-            <p>Player {currentRevealIndex + 1} of {players.length}: <strong>{players[currentRevealIndex]}</strong></p>
-            <p>Look at your word, then pass the device to the next player</p>
+            <h2 className="phase-title">Your Word</h2>
+            <p><strong>{players[currentRevealIndex]}</strong></p>
+            <p style={{marginBottom: '30px'}}>Look at your word, memorize it, then pass the device</p>
             
             <div className={`word-display ${currentRevealIndex === imposterIndex ? 'imposter-display' : ''}`}>
               {currentRevealIndex === imposterIndex ? (
