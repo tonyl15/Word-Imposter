@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from 'react';
-
-// Word lists for the game
-const WORD_CATEGORIES = {
-  animals: ['Dog', 'Cat', 'Elephant', 'Lion', 'Tiger', 'Bear', 'Rabbit', 'Horse', 'Cow', 'Pig'],
-  food: ['Pizza', 'Burger', 'Pasta', 'Sushi', 'Tacos', 'Ice cream', 'Chocolate', 'Apple', 'Banana', 'Bread'],
-  objects: ['Chair', 'Table', 'Phone', 'Computer', 'Car', 'Book', 'Pen', 'Clock', 'Mirror', 'Lamp'],
-  places: ['Beach', 'Mountain', 'Forest', 'City', 'School', 'Hospital', 'Library', 'Park', 'Mall', 'Airport'],
-  activities: ['Swimming', 'Running', 'Reading', 'Cooking', 'Dancing', 'Singing', 'Drawing', 'Writing', 'Gaming', 'Shopping']
-};
+import { getRandomWord } from './wordCategories';
 
 const GAME_PHASES = {
   SETUP: 'setup',
@@ -56,11 +48,8 @@ function App() {
 
   const startGame = () => {
     if (players.length >= 3) {
-      // Select random word from random category
-      const categories = Object.keys(WORD_CATEGORIES);
-      const randomCategory = categories[Math.floor(Math.random() * categories.length)];
-      const words = WORD_CATEGORIES[randomCategory];
-      const randomWord = words[Math.floor(Math.random() * words.length)];
+      // Get random word and category
+      const { word: randomWord } = getRandomWord();
       
       // Select random imposter
       const randomImposter = Math.floor(Math.random() * players.length);
