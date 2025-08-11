@@ -124,12 +124,6 @@ body {
   color: #333;
 }
 
-.imposter-display {
-  background: #fdeaea;
-  border: 3px solid #e74c3c;
-  color: #e74c3c;
-}
-
 .timer {
   font-size: 3em;
   font-weight: bold;

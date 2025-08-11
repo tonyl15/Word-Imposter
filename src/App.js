@@ -135,7 +135,7 @@ function App() {
             <p><strong>{players[currentRevealIndex]}</strong></p>
             <p style={{marginBottom: '30px'}}>Look at your word, memorize it, then pass the device</p>
             
-            <div className={`word-display ${currentRevealIndex === imposterIndex ? 'imposter-display' : ''}`}>
+            <div className="word-display">
               {currentRevealIndex === imposterIndex ? (
                 <>
                   *** YOU ARE THE IMPOSTER ***
