@@ -3,6 +3,7 @@ import { getRandomWord } from './wordCategories';
 
 const GAME_PHASES = {
   SETUP: 'setup',
+  SETTINGS: 'settings',
   PLAYER_READY: 'player_ready',
   WORD_REVEAL: 'word_reveal',
   ROUND_COMPLETE: 'round_complete'
@@ -13,8 +14,10 @@ function App() {
   const [playerCount, setPlayerCount] = useState(3);
   const [players, setPlayers] = useState([]);
   const [gameWord, setGameWord] = useState('');
+  const [gameCategory, setGameCategory] = useState('');
   const [imposterIndex, setImposterIndex] = useState(-1);
   const [currentRevealIndex, setCurrentRevealIndex] = useState(0);
+  const [showCategory, setShowCategory] = useState(false);
 
   // Generate player names based on count
   const generatePlayers = () => {
@@ -29,13 +32,14 @@ function App() {
     const generatedPlayers = generatePlayers();
     
     // Get random word and category
-    const { word: randomWord } = getRandomWord();
+    const { word: randomWord, category: randomCategory } = getRandomWord();
     
     // Select random imposter
     const randomImposter = Math.floor(Math.random() * generatedPlayers.length);
     
     setPlayers(generatedPlayers);
     setGameWord(randomWord);
+    setGameCategory(randomCategory);
     setImposterIndex(randomImposter);
     setGamePhase(GAME_PHASES.PLAYER_READY);
     setCurrentRevealIndex(0);
@@ -52,13 +56,22 @@ function App() {
 
   const startNewRound = () => {
     // Keep the same players, just get new word and imposter
-    const { word: randomWord } = getRandomWord();
+    const { word: randomWord, category: randomCategory } = getRandomWord();
     const randomImposter = Math.floor(Math.random() * players.length);
     
     setGameWord(randomWord);
+    setGameCategory(randomCategory);
     setImposterIndex(randomImposter);
     setGamePhase(GAME_PHASES.PLAYER_READY);
     setCurrentRevealIndex(0);
+  };
+
+  const goToSettings = () => {
+    setGamePhase(GAME_PHASES.SETTINGS);
+  };
+
+  const goBackToSetup = () => {
+    setGamePhase(GAME_PHASES.SETUP);
   };
 
   const resetGame = () => {
@@ -66,6 +79,7 @@ function App() {
     setPlayers([]);
     setPlayerCount(3);
     setGameWord('');
+    setGameCategory('');
     setImposterIndex(-1);
     setCurrentRevealIndex(0);
   };
@@ -106,8 +120,58 @@ function App() {
               </select>
             </div>
             
-            <button className="btn btn-primary" onClick={startGame}>
-              Start Game
+            <div style={{display: 'flex', gap: '15px', justifyContent: 'center', flexWrap: 'wrap'}}>
+              <button className="btn btn-primary" onClick={startGame}>
+                Start Game
+              </button>
+              <button className="btn btn-secondary" onClick={goToSettings}>
+                Settings
+              </button>
+            </div>
+          </div>
+        )}
+
+        {gamePhase === GAME_PHASES.SETTINGS && (
+          <div>
+            <h2 className="phase-title">Game Settings</h2>
+            <p>Customize your Word Imposter experience</p>
+            
+            <div style={{margin: '30px 0', textAlign: 'left', maxWidth: '400px', margin: '30px auto'}}>
+              <div style={{
+                background: '#f8f9fa',
+                padding: '20px',
+                borderRadius: '12px',
+                border: '2px solid #ddd'
+              }}>
+                <label style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '15px',
+                  fontSize: '1.1em',
+                  cursor: 'pointer'
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={showCategory}
+                    onChange={(e) => setShowCategory(e.target.checked)}
+                    style={{
+                      width: '20px',
+                      height: '20px',
+                      cursor: 'pointer'
+                    }}
+                  />
+                  <div>
+                    <strong>Show word category</strong>
+                    <div style={{fontSize: '0.9em', color: '#666', marginTop: '5px'}}>
+                      Display the category (e.g., "Animals", "Food") along with each word
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+            
+            <button className="btn btn-secondary" onClick={goBackToSetup}>
+              Back to Setup
             </button>
           </div>
         )}
@@ -136,6 +200,13 @@ function App() {
             <p style={{marginBottom: '30px'}}>Look at your word, memorize it, then pass the device</p>
             
             <div className="word-display">
+              {showCategory && (
+                <>
+                  <div style={{fontSize: '0.7em', color: '#667eea', marginBottom: '10px'}}>
+                    Category: {gameCategory.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  </div>
+                </>
+              )}
               {currentRevealIndex === imposterIndex ? (
                 <>
                   *** YOU ARE THE IMPOSTER ***
