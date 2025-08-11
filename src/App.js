@@ -6,6 +6,7 @@ const GAME_PHASES = {
   PLAYER_READY: 'player_ready',
   WORD_REVEAL: 'word_reveal',
   TIMER: 'timer',
+  VOTER_READY: 'voter_ready',
   VOTING: 'voting',
   RESULTS: 'results'
 };
@@ -17,6 +18,7 @@ function App() {
   const [gameWord, setGameWord] = useState('');
   const [imposterIndex, setImposterIndex] = useState(-1);
   const [currentRevealIndex, setCurrentRevealIndex] = useState(0);
+  const [currentVoterIndex, setCurrentVoterIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(120); // 2 minutes
   const [votes, setVotes] = useState({});
   const [hasVoted, setHasVoted] = useState({});
@@ -30,7 +32,8 @@ function App() {
         setTimeLeft(timeLeft => timeLeft - 1);
       }, 1000);
     } else if (timeLeft === 0 && gamePhase === GAME_PHASES.TIMER) {
-      setGamePhase(GAME_PHASES.VOTING);
+      setGamePhase(GAME_PHASES.VOTER_READY);
+      setCurrentVoterIndex(0);
     }
     return () => clearInterval(interval);
   }, [gamePhase, timeLeft]);
@@ -85,19 +88,34 @@ function App() {
   };
 
   const skipTimer = () => {
+    setGamePhase(GAME_PHASES.VOTER_READY);
+    setCurrentVoterIndex(0);
+  };
+
+  const showVotingOptions = () => {
     setGamePhase(GAME_PHASES.VOTING);
   };
 
-  const vote = (voterIndex, targetPlayer) => {
-    if (!hasVoted[players[voterIndex]]) {
-      setVotes(prev => ({
-        ...prev,
-        [targetPlayer]: prev[targetPlayer] + 1
-      }));
-      setHasVoted(prev => ({
-        ...prev,
-        [players[voterIndex]]: true
-      }));
+  const vote = (targetPlayer) => {
+    // Record the vote
+    setVotes(prev => ({
+      ...prev,
+      [targetPlayer]: (prev[targetPlayer] || 0) + 1
+    }));
+    
+    // Mark current player as having voted
+    setHasVoted(prev => ({
+      ...prev,
+      [players[currentVoterIndex]]: true
+    }));
+    
+    // Move to next voter
+    if (currentVoterIndex < players.length - 1) {
+      setCurrentVoterIndex(currentVoterIndex + 1);
+      setGamePhase(GAME_PHASES.VOTER_READY);
+    } else {
+      // All players have voted, show results
+      finishVoting();
     }
   };
 
@@ -134,6 +152,7 @@ function App() {
     setGameWord('');
     setImposterIndex(-1);
     setCurrentRevealIndex(0);
+    setCurrentVoterIndex(0);
     setTimeLeft(120);
     setVotes({});
     setHasVoted({});
@@ -261,43 +280,47 @@ function App() {
           </div>
         )}
 
-        {gamePhase === GAME_PHASES.VOTING && (
+        {gamePhase === GAME_PHASES.VOTER_READY && (
           <div>
             <h2 className="phase-title">Voting Time</h2>
-            <p>Each player votes for who they think is the imposter</p>
+            <p style={{fontSize: '1.2em', marginBottom: '30px'}}>
+              <strong style={{color: '#667eea'}}>{players[currentVoterIndex]}</strong>'s turn to vote
+            </p>
+            <p>Voter {currentVoterIndex + 1} of {players.length}</p>
+            <p style={{color: '#666', marginBottom: '40px'}}>
+              Make sure only <strong>{players[currentVoterIndex]}</strong> can see the screen, then click "Show Voting Options"
+            </p>
+            
+            <button className="btn btn-primary" onClick={showVotingOptions}>
+              Show Voting Options
+            </button>
+          </div>
+        )}
+
+        {gamePhase === GAME_PHASES.VOTING && (
+          <div>
+            <h2 className="phase-title">Cast Your Vote</h2>
+            <p style={{marginBottom: '30px'}}>
+              <strong>{players[currentVoterIndex]}</strong>, who do you think is the imposter?
+            </p>
             
             <div className="voting-grid">
-              {players.map((player, playerIndex) => (
-                <div key={player} className="vote-card">
-                  <h3>{player}</h3>
-                  <div className="vote-count">Votes: {votes[player] || 0}</div>
-                  {players.map((voter, voterIndex) => (
-                    <button
-                      key={`${voter}-votes-for-${player}`}
-                      className={`btn btn-primary`}
-                      style={{
-                        margin: '2px',
-                        padding: '5px 8px',
-                        fontSize: '12px',
-                        opacity: hasVoted[voter] ? 0.5 : 1
-                      }}
-                      onClick={() => vote(voterIndex, player)}
-                      disabled={hasVoted[voter] || voter === player}
-                    >
-                      {voter} votes
+              {players.map((player, index) => {
+                // Don't allow voting for yourself
+                if (index === currentVoterIndex) return null;
+                
+                return (
+                  <div key={player} className="vote-card" onClick={() => vote(player)}>
+                    <h3>{player}</h3>
+                    <div className="vote-count">
+                      Current votes: {votes[player] || 0}
+                    </div>
+                    <button className="btn btn-primary" style={{marginTop: '10px'}}>
+                      Vote for {player}
                     </button>
-                  ))}
-                </div>
-              ))}
-            </div>
-            
-            <div style={{marginTop: '20px'}}>
-              <p>Voted: {Object.values(hasVoted).filter(Boolean).length} / {players.length}</p>
-              {Object.values(hasVoted).every(Boolean) && (
-                <button className="btn btn-primary" onClick={finishVoting}>
-                  See Results
-                </button>
-              )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
