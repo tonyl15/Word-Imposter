@@ -3,11 +3,13 @@
   "version": "1.0.0",
   "description": "A Mafia-style word guessing game where players must identify the imposter",
   "main": "index.js",
+  "homepage": ".",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "deploy": "vercel --prod"
   },
   "dependencies": {
     "react": "^18.2.0",
