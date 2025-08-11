@@ -5,77 +5,40 @@ const GAME_PHASES = {
   SETUP: 'setup',
   PLAYER_READY: 'player_ready',
   WORD_REVEAL: 'word_reveal',
-  TIMER: 'timer',
-  VOTER_READY: 'voter_ready',
-  VOTING: 'voting',
-  RESULTS: 'results'
+  ROUND_COMPLETE: 'round_complete'
 };
 
 function App() {
   const [gamePhase, setGamePhase] = useState(GAME_PHASES.SETUP);
+  const [playerCount, setPlayerCount] = useState(3);
   const [players, setPlayers] = useState([]);
-  const [currentPlayerInput, setCurrentPlayerInput] = useState('');
   const [gameWord, setGameWord] = useState('');
   const [imposterIndex, setImposterIndex] = useState(-1);
   const [currentRevealIndex, setCurrentRevealIndex] = useState(0);
-  const [currentVoterIndex, setCurrentVoterIndex] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(120); // 2 minutes
-  const [votes, setVotes] = useState({});
-  const [hasVoted, setHasVoted] = useState({});
-  const [gameResults, setGameResults] = useState(null);
 
-  // Timer effect
-  useEffect(() => {
-    let interval = null;
-    if (gamePhase === GAME_PHASES.TIMER && timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft(timeLeft => timeLeft - 1);
-      }, 1000);
-    } else if (timeLeft === 0 && gamePhase === GAME_PHASES.TIMER) {
-      setGamePhase(GAME_PHASES.VOTER_READY);
-      setCurrentVoterIndex(0);
+  // Generate player names based on count
+  const generatePlayers = () => {
+    const playerNames = [];
+    for (let i = 1; i <= playerCount; i++) {
+      playerNames.push(`Player ${i}`);
     }
-    return () => clearInterval(interval);
-  }, [gamePhase, timeLeft]);
-
-  const addPlayer = () => {
-    if (currentPlayerInput.trim() && !players.includes(currentPlayerInput.trim())) {
-      setPlayers([...players, currentPlayerInput.trim()]);
-      setCurrentPlayerInput('');
-    }
-  };
-
-  const removePlayer = (playerToRemove) => {
-    setPlayers(players.filter(player => player !== playerToRemove));
+    return playerNames;
   };
 
   const startGame = () => {
-    if (players.length >= 3) {
-      // Get random word and category
-      const { word: randomWord } = getRandomWord();
-      
-      // Select random imposter
-      const randomImposter = Math.floor(Math.random() * players.length);
-      
-      setGameWord(randomWord);
-      setImposterIndex(randomImposter);
-      setGamePhase(GAME_PHASES.PLAYER_READY);
-      setCurrentRevealIndex(0);
-      
-      // Initialize voting state
-      const initialVotes = {};
-      const initialHasVoted = {};
-      players.forEach(player => {
-        initialVotes[player] = 0;
-        initialHasVoted[player] = false;
-      });
-      setVotes(initialVotes);
-      setHasVoted(initialHasVoted);
-    }
-  };
-
-  const showPlayerWord = () => {
-    setGamePhase(GAME_PHASES.WORD_REVEAL);
+    const generatedPlayers = generatePlayers();
+    
+    // Get random word and category
+    const { word: randomWord } = getRandomWord();
+    
+    // Select random imposter
+    const randomImposter = Math.floor(Math.random() * generatedPlayers.length);
+    
+    setPlayers(generatedPlayers);
+    setGameWord(randomWord);
+    setImposterIndex(randomImposter);
+    setGamePhase(GAME_PHASES.PLAYER_READY);
+    setCurrentRevealIndex(0);
   };
 
   const nextPlayerReveal = () => {
@@ -83,86 +46,32 @@ function App() {
       setCurrentRevealIndex(currentRevealIndex + 1);
       setGamePhase(GAME_PHASES.PLAYER_READY);
     } else {
-      setGamePhase(GAME_PHASES.TIMER);
+      setGamePhase(GAME_PHASES.ROUND_COMPLETE);
     }
   };
 
-  const skipTimer = () => {
-    setGamePhase(GAME_PHASES.VOTER_READY);
-    setCurrentVoterIndex(0);
-  };
-
-  const showVotingOptions = () => {
-    setGamePhase(GAME_PHASES.VOTING);
-  };
-
-  const vote = (targetPlayer) => {
-    // Record the vote
-    setVotes(prev => ({
-      ...prev,
-      [targetPlayer]: (prev[targetPlayer] || 0) + 1
-    }));
+  const startNewRound = () => {
+    // Keep the same players, just get new word and imposter
+    const { word: randomWord } = getRandomWord();
+    const randomImposter = Math.floor(Math.random() * players.length);
     
-    // Mark current player as having voted
-    setHasVoted(prev => ({
-      ...prev,
-      [players[currentVoterIndex]]: true
-    }));
-    
-    // Move to next voter
-    if (currentVoterIndex < players.length - 1) {
-      setCurrentVoterIndex(currentVoterIndex + 1);
-      setGamePhase(GAME_PHASES.VOTER_READY);
-    } else {
-      // All players have voted, show results
-      finishVoting();
-    }
-  };
-
-  const finishVoting = () => {
-    // Find player with most votes
-    let maxVotes = 0;
-    let votedOutPlayer = '';
-    Object.entries(votes).forEach(([player, voteCount]) => {
-      if (voteCount > maxVotes) {
-        maxVotes = voteCount;
-        votedOutPlayer = player;
-      }
-    });
-
-    // Determine winner
-    const imposterName = players[imposterIndex];
-    const imposterVotedOut = votedOutPlayer === imposterName;
-    
-    setGameResults({
-      votedOut: votedOutPlayer,
-      imposter: imposterName,
-      word: gameWord,
-      imposterWins: !imposterVotedOut,
-      votes: { ...votes }
-    });
-    
-    setGamePhase(GAME_PHASES.RESULTS);
+    setGameWord(randomWord);
+    setImposterIndex(randomImposter);
+    setGamePhase(GAME_PHASES.PLAYER_READY);
+    setCurrentRevealIndex(0);
   };
 
   const resetGame = () => {
     setGamePhase(GAME_PHASES.SETUP);
     setPlayers([]);
-    setCurrentPlayerInput('');
+    setPlayerCount(3);
     setGameWord('');
     setImposterIndex(-1);
     setCurrentRevealIndex(0);
-    setCurrentVoterIndex(0);
-    setTimeLeft(120);
-    setVotes({});
-    setHasVoted({});
-    setGameResults(null);
   };
 
-  const formatTime = (seconds) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+  const showPlayerWord = () => {
+    setGamePhase(GAME_PHASES.WORD_REVEAL);
   };
 
   return (
@@ -172,47 +81,34 @@ function App() {
         
         {gamePhase === GAME_PHASES.SETUP && (
           <div>
-            <h2 className="phase-title">Player Setup</h2>
-            <p>Add 3 or more players to start the game</p>
+            <h2 className="phase-title">Game Setup</h2>
+            <p>Select the number of players for the game</p>
             
-            <div className="player-input">
-              <input
-                type="text"
-                value={currentPlayerInput}
-                onChange={(e) => setCurrentPlayerInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && addPlayer()}
-                placeholder="Enter player name"
-              />
-              <button className="btn btn-primary" onClick={addPlayer}>
-                Add Player
-              </button>
+            <div style={{margin: '30px 0'}}>
+              <label htmlFor="playerCount" style={{fontSize: '1.2em', marginRight: '15px'}}>
+                Number of Players:
+              </label>
+              <select
+                id="playerCount"
+                value={playerCount}
+                onChange={(e) => setPlayerCount(parseInt(e.target.value))}
+                style={{
+                  padding: '10px',
+                  fontSize: '16px',
+                  borderRadius: '8px',
+                  border: '2px solid #ddd',
+                  marginRight: '20px'
+                }}
+              >
+                {[3, 4, 5, 6, 7, 8, 9, 10].map(num => (
+                  <option key={num} value={num}>{num} Players</option>
+                ))}
+              </select>
             </div>
             
-            <div className="players-list">
-              <h3>Players ({players.length}):</h3>
-              {players.map((player, index) => (
-                <div key={index} className="player-item">
-                  {player}
-                  <button 
-                    className="btn btn-danger" 
-                    style={{marginLeft: '10px', padding: '5px 10px', fontSize: '12px'}}
-                    onClick={() => removePlayer(player)}
-                  >
-                    Remove
-                  </button>
-                </div>
-              ))}
-            </div>
-            
-            {players.length >= 3 && (
-              <button className="btn btn-primary" onClick={startGame}>
-                Start Game
-              </button>
-            )}
-            
-            {players.length < 3 && (
-              <p style={{color: '#e74c3c'}}>Need at least 3 players to start</p>
-            )}
+            <button className="btn btn-primary" onClick={startGame}>
+              Start Game
+            </button>
           </div>
         )}
 
@@ -254,110 +150,26 @@ function App() {
             </div>
             
             <button className="btn btn-primary" onClick={nextPlayerReveal}>
-              {currentRevealIndex < players.length - 1 ? 'Next Player' : 'Start Discussion'}
+              {currentRevealIndex < players.length - 1 ? 'Next Player' : 'Finish Round'}
             </button>
           </div>
         )}
 
-        {gamePhase === GAME_PHASES.TIMER && (
-          <div style={{position: 'relative'}}>
-            <button className="btn btn-secondary skip-btn" onClick={skipTimer}>
-              Skip Timer
-            </button>
-            <h2 className="phase-title">Discussion Time</h2>
-            <p>Discuss and try to figure out who the imposter is!</p>
-            <p>The imposter should try to blend in without knowing the word.</p>
-            
-            <div className="timer">
-              {formatTime(timeLeft)}
-            </div>
-            
-            {timeLeft <= 10 && (
-              <p style={{color: '#e74c3c', fontSize: '1.2em'}}>
-                Time's almost up!
-              </p>
-            )}
-          </div>
-        )}
-
-        {gamePhase === GAME_PHASES.VOTER_READY && (
+        {gamePhase === GAME_PHASES.ROUND_COMPLETE && (
           <div>
-            <h2 className="phase-title">Voting Time</h2>
+            <h2 className="phase-title">Round Complete!</h2>
             <p style={{fontSize: '1.2em', marginBottom: '30px'}}>
-              <strong style={{color: '#667eea'}}>{players[currentVoterIndex]}</strong>'s turn to vote
-            </p>
-            <p>Voter {currentVoterIndex + 1} of {players.length}</p>
-            <p style={{color: '#666', marginBottom: '40px'}}>
-              Make sure only <strong>{players[currentVoterIndex]}</strong> can see the screen, then click "Show Voting Options"
+              All players have seen their words. You can now discuss and try to identify the imposter!
             </p>
             
-            <button className="btn btn-primary" onClick={showVotingOptions}>
-              Show Voting Options
-            </button>
-          </div>
-        )}
-
-        {gamePhase === GAME_PHASES.VOTING && (
-          <div>
-            <h2 className="phase-title">Cast Your Vote</h2>
-            <p style={{marginBottom: '30px'}}>
-              <strong>{players[currentVoterIndex]}</strong>, who do you think is the imposter?
-            </p>
-            
-            <div className="voting-grid">
-              {players.map((player, index) => {
-                // Don't allow voting for yourself
-                if (index === currentVoterIndex) return null;
-                
-                return (
-                  <div key={player} className="vote-card" onClick={() => vote(player)}>
-                    <h3>{player}</h3>
-                    <div className="vote-count">
-                      Current votes: {votes[player] || 0}
-                    </div>
-                    <button className="btn btn-primary" style={{marginTop: '10px'}}>
-                      Vote for {player}
-                    </button>
-                  </div>
-                );
-              })}
+            <div style={{display: 'flex', gap: '15px', justifyContent: 'center', flexWrap: 'wrap'}}>
+              <button className="btn btn-primary" onClick={startNewRound}>
+                Start New Round
+              </button>
+              <button className="btn btn-secondary" onClick={resetGame}>
+                Change Players
+              </button>
             </div>
-          </div>
-        )}
-
-        {gamePhase === GAME_PHASES.RESULTS && gameResults && (
-          <div className="results">
-            <h2 className="phase-title">Game Results</h2>
-            
-            <div className="reveal">
-              <h3>The word was: <strong>{gameResults.word}</strong></h3>
-              <h3>The imposter was: <strong>{gameResults.imposter}</strong></h3>
-              <h3>Voted out: <strong>{gameResults.votedOut}</strong></h3>
-            </div>
-            
-            <div className="winner">
-              {gameResults.imposterWins ? (
-                <>*** IMPOSTER WINS! ***<br />
-                The imposter successfully avoided detection!</>
-              ) : (
-                <>*** CITIZENS WIN! ***<br />
-                The imposter was caught!</>
-              )}
-            </div>
-            
-            <div>
-              <h4>Final Vote Count:</h4>
-              {Object.entries(gameResults.votes).map(([player, voteCount]) => (
-                <div key={player} style={{margin: '5px 0'}}>
-                  {player}: {voteCount} votes
-                  {player === gameResults.imposter && ' [IMPOSTER]'}
-                </div>
-              ))}
-            </div>
-            
-            <button className="btn btn-primary" onClick={resetGame}>
-              Play Again
-            </button>
           </div>
         )}
       </div>
