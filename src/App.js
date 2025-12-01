@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getRandomWord } from './wordCategories';
+import { getWordHint } from './api/wordHintService';
 
 const GAME_PHASES = {
   SETUP: 'setup',
@@ -18,6 +19,9 @@ function App() {
   const [imposterIndex, setImposterIndex] = useState(-1);
   const [currentRevealIndex, setCurrentRevealIndex] = useState(0);
   const [showCategory, setShowCategory] = useState(false);
+  const [imposterHint, setImposterHint] = useState(null);
+  const [hintLoading, setHintLoading] = useState(false);
+  const [hintError, setHintError] = useState(null);
 
   // Generate player names based on count
   const generatePlayers = () => {
@@ -26,6 +30,28 @@ function App() {
       playerNames.push(`Player ${i}`);
     }
     return playerNames;
+  };
+
+  // Fetch hint for the imposter
+  const fetchImposterHint = async (word) => {
+    setHintLoading(true);
+    setHintError(null);
+    setImposterHint(null);
+
+    try {
+      const { hint, error } = await getWordHint(word);
+      
+      if (error) {
+        setHintError(error);
+      } else {
+        setImposterHint(hint);
+      }
+    } catch (err) {
+      setHintError('Failed to fetch hint');
+      console.error('Error fetching hint:', err);
+    } finally {
+      setHintLoading(false);
+    }
   };
 
   const startGame = () => {
@@ -43,6 +69,14 @@ function App() {
     setImposterIndex(randomImposter);
     setGamePhase(GAME_PHASES.PLAYER_READY);
     setCurrentRevealIndex(0);
+    
+    // Reset hint state
+    setImposterHint(null);
+    setHintError(null);
+    setHintLoading(false);
+    
+    // Fetch hint for the imposter
+    fetchImposterHint(randomWord);
   };
 
   const nextPlayerReveal = () => {
@@ -64,6 +98,12 @@ function App() {
     setImposterIndex(randomImposter);
     setGamePhase(GAME_PHASES.PLAYER_READY);
     setCurrentRevealIndex(0);
+    
+    // Reset hint state and fetch new hint
+    setImposterHint(null);
+    setHintError(null);
+    setHintLoading(false);
+    fetchImposterHint(randomWord);
   };
 
   const goToSettings = () => {
@@ -82,6 +122,9 @@ function App() {
     setGameCategory('');
     setImposterIndex(-1);
     setCurrentRevealIndex(0);
+    setImposterHint(null);
+    setHintError(null);
+    setHintLoading(false);
   };
 
   const showPlayerWord = () => {
@@ -209,9 +252,44 @@ function App() {
               )}
               {currentRevealIndex === imposterIndex ? (
                 <>
-                  *** YOU ARE THE IMPOSTER ***
-                  <br />
-                  <span style={{fontSize: '0.6em'}}>Try to guess the word and blend in!</span>
+                  <div style={{color: '#667eea', fontWeight: 'bold', marginBottom: '20px'}}>
+                    *** YOU ARE THE IMPOSTER ***
+                  </div>
+                  <div style={{fontSize: '0.8em', marginBottom: '15px', color: '#666'}}>
+                    Try to guess the word and blend in!
+                  </div>
+                  
+                  {/* Hint section for imposter */}
+                  <div style={{
+                    background: '#e0e7ff', 
+                    borderRadius: '8px', 
+                    padding: '15px',
+                    margin: '15px 0'
+                  }}>
+                    <div style={{fontSize: '0.9em', fontWeight: 'bold', color: '#667eea', marginBottom: '8px'}}>
+                      Hint:
+                    </div>
+                    {hintLoading ? (
+                      <div style={{color: '#666', fontSize: '0.8em'}}>
+                        Loading hint...
+                      </div>
+                    ) : hintError ? (
+                      <div style={{color: '#666', fontSize: '0.8em'}}>
+                        Hint unavailable
+                      </div>
+                    ) : imposterHint ? (
+                      <div style={{color: '#856404', fontSize: '0.9em'}}>
+                        <strong>{imposterHint}</strong>
+                        <div style={{fontSize: '0.75em', marginTop: '5px', color: '#6c757d'}}>
+                          (A word related to the secret word)
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{color: '#666', fontSize: '0.8em'}}>
+                        No hint available for this word
+                      </div>
+                    )}
+                  </div>
                 </>
               ) : (
                 <>
