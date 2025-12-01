@@ -2,10 +2,6 @@
  * Service for fetching word hints from the backend API
  */
 
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? '' // In production, API routes are relative
-  : 'http://localhost:3000'; // In development, use local server
-
 /**
  * Fetches a hint for the given word using the Wordnik API
  * @param {string} word - The word to get a hint for
@@ -16,9 +12,17 @@ export async function getWordHint(word) {
     return { hint: null, error: 'Invalid word provided' };
   }
 
+  // In development, return a mock hint for testing
+  if (process.env.NODE_ENV === 'development') {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    return { hint: 'MOCK HINT', error: null };
+  }
+
   try {
     const response = await fetch(
-      `${API_BASE_URL}/api/related-words?word=${encodeURIComponent(word)}`,
+      `/api/related-words?word=${encodeURIComponent(word)}`,
       {
         method: 'GET',
         headers: {
@@ -57,8 +61,13 @@ export async function getWordHint(word) {
  * @returns {Promise<boolean>}
  */
 export async function isHintServiceAvailable() {
+  // Always available in development (mock) and production
+  if (process.env.NODE_ENV === 'development') {
+    return true;
+  }
+  
   try {
-    const response = await fetch(`${API_BASE_URL}/api/related-words?word=test`);
+    const response = await fetch(`/api/related-words?word=test`);
     return response.status !== 404; // API exists even if it fails with test word
   } catch (error) {
     return false;

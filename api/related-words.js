@@ -48,7 +48,7 @@ export default async function handler(req, res) {
 
     const data = await response.json();
     
-    // Extract the first word from the same-context relationship type
+    // Extract a random word from the same-context relationship type
     let hint = null;
     if (data && data.length > 0) {
       const sameContextRelation = data.find(relation => 
@@ -58,7 +58,8 @@ export default async function handler(req, res) {
       );
       
       if (sameContextRelation) {
-        hint = sameContextRelation.words[0];
+        const randomIndex = Math.floor(Math.random() * sameContextRelation.words.length);
+        hint = sameContextRelation.words[randomIndex];
       }
     }
 

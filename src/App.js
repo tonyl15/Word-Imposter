@@ -280,9 +280,6 @@ function App() {
                     ) : imposterHint ? (
                       <div style={{color: '#856404', fontSize: '0.9em'}}>
                         <strong>{imposterHint}</strong>
-                        <div style={{fontSize: '0.75em', marginTop: '5px', color: '#6c757d'}}>
-                          (A word related to the secret word)
-                        </div>
                       </div>
                     ) : (
                       <div style={{color: '#666', fontSize: '0.8em'}}>
