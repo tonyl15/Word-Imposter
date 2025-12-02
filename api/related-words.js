@@ -24,6 +24,7 @@ export default async function handler(req, res) {
   // Check if API key is configured
   const apiKey = process.env.WORDNIK_API_KEY;
   console.log('API key exists:', !!apiKey);
+  console.log('Environment variables:', Object.keys(process.env).filter(key => key.includes('WORDNIK')));
   if (!apiKey) {
     return res.status(500).json({ error: 'Wordnik API key not configured' });
   }
