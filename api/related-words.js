@@ -30,10 +30,13 @@ export default async function handler(req, res) {
   }
 
   try {
-    console.log('Making request to Wordnik API for word:', word);
+    // Convert word to lowercase for API consistency
+    const normalizedWord = word.toLowerCase();
+    console.log('Making request to Wordnik API for word:', normalizedWord);
+    
     // Make request to Wordnik API
     const response = await fetch(
-      `https://api.wordnik.com/v4/word.json/${encodeURIComponent(word)}/relatedWords?useCanonical=false&relationshipTypes=same-context&limitPerRelationshipType=10&api_key=${apiKey}`,
+      `https://api.wordnik.com/v4/word.json/${encodeURIComponent(normalizedWord)}/relatedWords?useCanonical=false&relationshipTypes=same-context&limitPerRelationshipType=10&api_key=${apiKey}`,
       {
         method: 'GET',
         headers: {
