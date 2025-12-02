@@ -15,6 +15,7 @@ export default async function handler(req, res) {
   }
 
   const { word } = req.query;
+  console.log('Received word:', word);
 
   if (!word) {
     return res.status(400).json({ error: 'Word parameter is required' });
@@ -22,11 +23,13 @@ export default async function handler(req, res) {
 
   // Check if API key is configured
   const apiKey = process.env.WORDNIK_API_KEY;
+  console.log('API key exists:', !!apiKey);
   if (!apiKey) {
     return res.status(500).json({ error: 'Wordnik API key not configured' });
   }
 
   try {
+    console.log('Making request to Wordnik API for word:', word);
     // Make request to Wordnik API
     const response = await fetch(
       `https://api.wordnik.com/v4/word.json/${encodeURIComponent(word)}/relatedWords?useCanonical=false&relationshipTypes=same-context&limitPerRelationshipType=10&api_key=${apiKey}`,
@@ -38,6 +41,8 @@ export default async function handler(req, res) {
       }
     );
 
+    console.log('Wordnik API response status:', response.status);
+
     if (!response.ok) {
       console.error(`Wordnik API error: ${response.status} ${response.statusText}`);
       return res.status(response.status).json({ 
@@ -47,6 +52,7 @@ export default async function handler(req, res) {
     }
 
     const data = await response.json();
+    console.log('Wordnik API data length:', data?.length || 0);
     
     // Extract a random word from the same-context relationship type
     let hint = null;
@@ -60,7 +66,12 @@ export default async function handler(req, res) {
       if (sameContextRelation) {
         const randomIndex = Math.floor(Math.random() * sameContextRelation.words.length);
         hint = sameContextRelation.words[randomIndex];
+        console.log('Found hint:', hint);
+      } else {
+        console.log('No same-context relation found');
       }
+    } else {
+      console.log('No data returned from Wordnik API');
     }
 
     return res.status(200).json({ 
