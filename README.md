@@ -1,23 +1,23 @@
 # Word Imposter
 
-A React-based social deduction party game where players try to identify the imposter among them using word clues.
+A React-based social deduction party game where players try to identify the imposter among them using word clues. Features a beautiful gradient interface with over 1,100 words across 47 categories.
 
-## How to Play
+## 🎮 How to Play
 
 1. **Setup**: Choose 3-10 players for the game
-2. **Word Reveal**: Each player privately views their assigned word on the shared device
+2. **Settings** (Optional): Configure game options like category display and imposter hints
+3. **Word Reveal**: Each player privately views their assigned word on the shared device
    - **Regular players** see the same secret word
    - **The imposter** gets notified they're the imposter but doesn't see the word
-3. **Discussion**: Players discuss and give clues about their word to identify who doesn't belong
-4. **Deduction**: Through conversation, players try to figure out who the imposter is
-5. **New Round**: Start another round with a different word and new imposter
+4. **Discussion**: Players discuss and give clues about their word to identify who doesn't belong
+5. **Deduction**: Through conversation, players try to figure out who the imposter is
+6. **New Round**: Start another round with a different word and new imposter
 
-## Game Rules
+## 🎯 Game Rules
 
 - **Regular Players**: All get the same word and must work together to identify the imposter through discussion
 - **Imposter**: Doesn't know the word but must blend in by listening to clues and trying not to be discovered
 - **Strategy**: Regular players give clues that are specific enough to exclude the imposter but vague enough to not give away the word immediately
-- **No Voting System**: The game focuses on discussion and social deduction rather than formal voting
 
 ## Installation and Setup
 
@@ -38,12 +38,21 @@ A React-based social deduction party game where players try to identify the impo
    npm install
    ```
 
-3. Start the development server:
+3. Set up Wordnik API for hints (optional):
+   - Get a free API key from [Wordnik Developer](https://developer.wordnik.com/)
+   - Copy `.env.example` to `.env.local`
+   - Add your API key to `.env.local`:
+     ```
+     WORDNIK_API_KEY=your_actual_api_key_here
+     ```
+   - **Note**: If you skip this step, the game will still work, but imposters won't get hints
+
+4. Start the development server:
    ```bash
    npm start
    ```
 
-4. Open your browser to `http://localhost:3000` and start playing!
+5. Open your browser to `http://localhost:3000` and start playing!
 
 ### Building for Production
 
@@ -56,7 +65,9 @@ The build folder will contain the optimized production files ready for deploymen
 
 ## Features
 
+- **Modern UI Design**: Beautiful gradient backgrounds with a clean, centered interface
 - **Flexible Player Count**: Supports 3-10 players per game
+- **Optional Imposter Hints**: Intelligent hints for imposters using Wordnik API to make gameplay more balanced
 - **Extensive Word Library**: Over 1,100 words across 47 diverse categories including:
   - Animals, Food, Objects, Places, Activities
   - Professions, Sports, Vehicles, Clothing, Furniture
@@ -67,36 +78,46 @@ The build folder will contain the optimized production files ready for deploymen
   - And many more specialized categories
 - **Customizable Settings**: 
   - Option to show/hide word categories to players
-  - Helpful for balancing game difficulty
+  - Toggle imposter hints on/off for difficulty adjustment
 - **Pass-and-Play Design**: Single device gameplay perfect for parties and social gatherings
-- **Clean Interface**: Simple, intuitive design that works on all screen sizes
+- **Responsive Interface**: Clean, intuitive design optimized for all screen sizes
 - **Instant Setup**: No accounts or complex setup required
 - **Continuous Play**: Easy transition between rounds with different words and imposters
+- **Secure API Integration**: Backend serverless functions protect API keys from client exposure
 
 ## Game Flow
 
 1. **Setup Phase**: Select number of players (3-10)
-2. **Settings** (Optional): Choose whether to display word categories
+2. **Settings** (Optional): Configure word categories display and imposter hints
 3. **Word Distribution**: Device is passed to each player in turn to see their word privately
 4. **Discussion Phase**: Players discuss and give clues (no timer - play at your own pace)
 5. **New Round**: Start fresh with a new random word and different imposter
 
 ## Technologies Used
 
-- **React 18**: Modern React with hooks for state management
+- **React 18**: Modern React with hooks for state management and component architecture
 - **Create React App**: Zero-configuration setup and build tooling
-- **CSS3**: Custom styling with animations and responsive design
+- **CSS3**: Custom gradient styling with smooth animations and responsive design
 - **JavaScript ES6+**: Modern JavaScript features and syntax
+- **Wordnik API**: External API integration for intelligent hint generation
+- **Vercel Serverless Functions**: Secure backend API endpoints for external service integration
 
 ## Deployment
+### Deploying with Hints Feature
 
-This game is optimized for deployment on platforms like:
-- Vercel (recommended)
-- Netlify
-- GitHub Pages
-- Any static hosting service
+To deploy with the imposter hints feature:
 
-The game works entirely in the browser with no backend requirements.
+1. **Vercel**: 
+   - Connect your repository to Vercel
+   - Add `WORDNIK_API_KEY` in the Environment Variables section
+   - Deploy
+
+2. **Other Platforms**: 
+   - Ensure your hosting platform supports serverless functions
+   - Add the `WORDNIK_API_KEY` environment variable
+   - Deploy the `/api` folder as serverless functions
+
+**Note**: The game works without the hints feature on any static hosting platform.
 
 ## Contributing
 
