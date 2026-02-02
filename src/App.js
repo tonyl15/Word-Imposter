@@ -1,16 +1,25 @@
 import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { getRandomWord } from './wordCategories';
 import { GAME_PHASES } from './constants/gamePhases';
 import { useGameState, useHints } from './hooks/useGame';
+import { AuthProvider } from './context/AuthContext';
+import { useAuth } from './hooks/useAuth';
 
-// Components
+// Auth Components
+import Login from './components/Auth/Login';
+import SignUp from './components/Auth/SignUp';
+import ProtectedRoute from './components/Auth/ProtectedRoute';
+
+// Game Components
+import Header from './components/Header';
 import PlayerSetup from './components/PlayerSetup';
 import GameSettings from './settings/GameSettings';
 import Discussion from './components/GamePhases/Discussion';
 import WordReveal from './components/GamePhases/WordReveal';
 import GameComplete from './components/GamePhases/GameComplete';
 
-function App() {
+function GameApp() {
   const [gamePhase, setGamePhase] = useState(GAME_PHASES.SETUP);
   const [playerCount, setPlayerCount] = useState(3);
   const [players, setPlayers] = useState([]);
@@ -113,63 +122,86 @@ function App() {
   };
 
   return (
-    <div style={{minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px'}}>
-      <div className="game-container">
-        <h1 style={{fontSize: '3.5rem', fontWeight: 'bold', color: '#667eea', marginBottom: '20px', textShadow: '1px 1px 2px rgba(0,0,0,0.1)', textAlign: 'center'}}>Word Imposter</h1>
-        
-        {gamePhase === GAME_PHASES.SETUP && (
-          <PlayerSetup
-            playerCount={playerCount}
-            setPlayerCount={setPlayerCount}
-            onStartGame={startGame}
-            onGoToSettings={goToSettings}
-          />
-        )}
+    <div style={{minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: '#f9f9f9'}}>
+      <Header />
+      <div style={{flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px'}}>
+        <div className="game-container">
+          {gamePhase === GAME_PHASES.SETUP && (
+            <PlayerSetup
+              playerCount={playerCount}
+              setPlayerCount={setPlayerCount}
+              onStartGame={startGame}
+              onGoToSettings={goToSettings}
+            />
+          )}
 
-        {gamePhase === GAME_PHASES.SETTINGS && (
-          <GameSettings
-            showCategory={showCategory}
-            setShowCategory={setShowCategory}
-            enableHints={enableHints}
-            setEnableHints={setEnableHints}
-            onGoBackToSetup={goBackToSetup}
-          />
-        )}
+          {gamePhase === GAME_PHASES.SETTINGS && (
+            <GameSettings
+              showCategory={showCategory}
+              setShowCategory={setShowCategory}
+              enableHints={enableHints}
+              setEnableHints={setEnableHints}
+              onGoBackToSetup={goBackToSetup}
+            />
+          )}
 
-        {gamePhase === GAME_PHASES.PLAYER_READY && (
-          <Discussion
-            currentPlayer={players[currentRevealIndex]}
-            playerNumber={currentRevealIndex + 1}
-            totalPlayers={players.length}
-            onShowPlayerWord={showPlayerWord}
-          />
-        )}
+          {gamePhase === GAME_PHASES.PLAYER_READY && (
+            <Discussion
+              currentPlayer={players[currentRevealIndex]}
+              playerNumber={currentRevealIndex + 1}
+              totalPlayers={players.length}
+              onShowPlayerWord={showPlayerWord}
+            />
+          )}
 
-        {gamePhase === GAME_PHASES.WORD_REVEAL && (
-          <WordReveal
-            currentPlayer={players[currentRevealIndex]}
-            playerNumber={currentRevealIndex + 1}
-            totalPlayers={players.length}
-            gameWord={gameWord}
-            gameCategory={gameCategory}
-            showCategory={showCategory}
-            isImposter={currentRevealIndex === imposterIndex}
-            enableHints={enableHints}
-            hintLoading={hintLoading}
-            hintError={hintError}
-            imposterHint={imposterHint}
-            onNextPlayer={nextPlayerReveal}
-          />
-        )}
+          {gamePhase === GAME_PHASES.WORD_REVEAL && (
+            <WordReveal
+              currentPlayer={players[currentRevealIndex]}
+              playerNumber={currentRevealIndex + 1}
+              totalPlayers={players.length}
+              gameWord={gameWord}
+              gameCategory={gameCategory}
+              showCategory={showCategory}
+              isImposter={currentRevealIndex === imposterIndex}
+              enableHints={enableHints}
+              hintLoading={hintLoading}
+              hintError={hintError}
+              imposterHint={imposterHint}
+              onNextPlayer={nextPlayerReveal}
+            />
+          )}
 
-        {gamePhase === GAME_PHASES.ROUND_COMPLETE && (
-          <GameComplete
-            onStartNewRound={startNewRound}
-            onResetGame={resetGame}
-          />
-        )}
+          {gamePhase === GAME_PHASES.ROUND_COMPLETE && (
+            <GameComplete
+              onStartNewRound={startNewRound}
+              onResetGame={resetGame}
+            />
+          )}
+        </div>
       </div>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AuthProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route 
+            path="/game" 
+            element={
+              <ProtectedRoute>
+                <GameApp />
+              </ProtectedRoute>
+            } 
+          />
+          <Route path="/" element={<Navigate to="/game" />} />
+        </Routes>
+      </AuthProvider>
+    </Router>
   );
 }
 
