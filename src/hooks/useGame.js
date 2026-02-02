@@ -1,4 +1,4 @@
-import { getWordHint } from '../api/wordHintService';
+import { getWordHint } from '../services/wordHintService';
 
 export const useGameState = () => {
   // This could be expanded to include more game state logic
