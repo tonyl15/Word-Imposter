@@ -3,7 +3,7 @@
  * Run this to test if the hints are working properly
  */
 
-import { getWordHint } from '../src/api/wordHintService.js';
+import { getWordHint } from '../src/services/wordHintService.js';
 
 // Test words
 const testWords = ['musician', 'elephant', 'pizza', 'computer', 'ocean'];
