@@ -2,6 +2,15 @@
  * Service for fetching word hints from the backend API
  */
 
+// Backend base URL: use env if provided, else default to same-origin /api
+const API_BASE_URL = process.env.REACT_APP_API_URL || '';
+
+// Env-only toggle: REACT_APP_USE_HINT_MOCK === 'true' enables mock hints,
+// === 'false' disables; if undefined, default ON in development, OFF otherwise.
+const USE_HINT_MOCK =
+  process.env.REACT_APP_USE_HINT_MOCK === 'true' ||
+  (process.env.REACT_APP_USE_HINT_MOCK === undefined && process.env.NODE_ENV === 'development');
+
 /**
  * Fetches a hint for the given word using the Wordnik API
  * @param {string} word - The word to get a hint for
@@ -12,8 +21,8 @@ export async function getWordHint(word) {
     return { hint: null, error: 'Invalid word provided' };
   }
 
-  // In development, return a mock hint for testing
-  if (process.env.NODE_ENV === 'development') {
+  // Return a mock hint when mock mode is enabled
+  if (USE_HINT_MOCK) {
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 500));
     
@@ -21,8 +30,10 @@ export async function getWordHint(word) {
   }
 
   try {
+    const base = API_BASE_URL || '';
+    const url = `${base}/api/related-words?word=${encodeURIComponent(word)}`;
     const response = await fetch(
-      `/api/related-words?word=${encodeURIComponent(word)}`,
+      url,
       {
         method: 'GET',
         headers: {
@@ -32,7 +43,16 @@ export async function getWordHint(word) {
     );
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      let errorData = {};
+      try {
+        errorData = await response.json();
+      } catch (e) {
+        try {
+          const text = await response.text();
+          errorData = { error: text };
+        } catch {}
+      }
+      console.warn('[hintService] non-OK response. payload:', errorData);
       return { 
         hint: null, 
         error: errorData.error || `HTTP ${response.status}: ${response.statusText}` 
@@ -44,6 +64,7 @@ export async function getWordHint(word) {
     if (data.success && data.hint) {
       return { hint: data.hint, error: null };
     } else {
+      console.warn('[hintService] success response but no hint. message:', data.error);
       return { hint: null, error: 'No hint found for this word' };
     }
 
@@ -61,15 +82,18 @@ export async function getWordHint(word) {
  * @returns {Promise<boolean>}
  */
 export async function isHintServiceAvailable() {
-  // Always available in development (mock) and production
-  if (process.env.NODE_ENV === 'development') {
+  // Always available when mock mode is enabled
+  if (USE_HINT_MOCK) {
     return true;
   }
   
   try {
-    const response = await fetch(`/api/related-words?word=test`);
+    const base = API_BASE_URL || '';
+    const url = `${base}/api/related-words?word=test`;
+    const response = await fetch(url);
     return response.status !== 404; // API exists even if it fails with test word
   } catch (error) {
+    console.warn('[hintService] availability check failed:', error);
     return false;
   }
 }

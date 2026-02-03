@@ -18,6 +18,14 @@ app.use(express.urlencoded({ extended: true }));
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
+// Mount hints route with a startup log for debugging
+try {
+  const hintsRouter = require('./routes/hints');
+  console.log('Mounting hints router at /api');
+  app.use('/api', hintsRouter);
+} catch (e) {
+  console.warn('Hints router not mounted:', e?.message || e);
+}
 
 // Health check route
 app.get('/api/health', (req, res) => {

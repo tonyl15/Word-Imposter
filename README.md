@@ -40,58 +40,66 @@ A React-based social deduction party game where players try to identify the impo
    cd backend && npm install && cd ..
    ```
 
-3. Configure environment variables:
-   - Create `backend/.env`:
+3. Set up Wordnik API for hints (optional):
+   - Get a free API key from [Wordnik Developer](https://developer.wordnik.com/)
+   - Copy `.env.example` to `.env.local`
+   - Add your API key to `.env.local`:
      ```
-     MONGODB_URI=your_mongodb_atlas_connection_string
-     JWT_SECRET=your_secret_key
+     WORDNIK_API_KEY=your_actual_api_key_here
      ```
-   - Update `frontend/.env.local`:
-     ```
-     REACT_APP_API_URL=http://localhost:5000
-     WORDNIK_API_KEY=your_wordnik_api_key (optional)
-     ```
+   - **Note**: If you skip this step, the game will still work, but imposters won't get hints
 
-4. Start both frontend and backend:
+4. Start the development server:
    ```bash
-   npm run dev
+   npm start
    ```
-   This starts the React frontend (port 3000) and Node.js backend (port 5000)
 
-5. Open `http://localhost:3000` to play!
+5. Open your browser to `http://localhost:3000` and start playing!
 
-### Guest Play
-- No account required to play
-- Create an account anytime via the Sign Up button in the header
-- Logged-in users can create custom dictionaries and view their profile (coming soon)
+### Building for Production
+
+To create a production build:
+```bash
+npm run build
+```
+
+The build folder will contain the optimized production files ready for deployment.
 
 ## Features
 
-- **Guest & Account System**: Play as guest or create an account for custom dictionaries
-- **Modern UI Design**: Beautiful gradient backgrounds with clean, responsive interface
+- **Modern UI Design**: Beautiful gradient backgrounds with a clean, centered interface
 - **Flexible Player Count**: Supports 3-10 players per game
-- **Optional Imposter Hints**: Intelligent hints for imposters using Wordnik API
-- **Extensive Word Library**: 1,100+ words across 47 categories
-- **Customizable Settings**: Show/hide categories and toggle hints
-- **Mobile Friendly**: Responsive design for all screen sizes
-- **Pass-and-Play Design**: Perfect for parties and social gatherings
+- **Optional Imposter Hints**: Intelligent hints for imposters using Wordnik API to make gameplay more balanced
+- **Extensive Word Library**: Over 1,100 words across 47 diverse categories including:
+  - Animals, Food, Objects, Places, Activities
+  - Professions, Sports, Vehicles, Clothing, Furniture
+  - Kitchen Items, School Subjects, Weather, Emotions
+  - Music Instruments, Board Games, Technology, Body Parts
+  - Movies, Fruits, Vegetables, Drinks, Colors, Countries
+  - Space & Planets, Sea Creatures, Insects, Birds, Flowers
+  - And many more specialized categories
+- **Customizable Settings**: 
+  - Option to show/hide word categories to players
+  - Toggle imposter hints on/off for difficulty adjustment
+- **Pass-and-Play Design**: Single device gameplay perfect for parties and social gatherings
+- **Responsive Interface**: Clean, intuitive design optimized for all screen sizes
+- **Instant Setup**: No accounts or complex setup required
+- **Continuous Play**: Easy transition between rounds with different words and imposters
+- **Secure API Integration**: Backend serverless functions protect API keys from client exposure
+
+## Game Flow
+
+1. **Setup Phase**: Select number of players (3-10)
+2. **Settings** (Optional): Configure word categories display and imposter hints
+3. **Word Distribution**: Device is passed to each player in turn to see their word privately
+4. **Discussion Phase**: Players discuss and give clues (no timer - play at your own pace)
+5. **New Round**: Start fresh with a new random word and different imposter
 
 ## Technologies Used
 
-**Frontend:**
-- React 18 with React Router for navigation
-- Axios for API communication
-- Context API for authentication state management
-
-**Backend:**
-- Node.js & Express for REST API
-- MongoDB & Mongoose for database
-- JWT for authentication
-- Bcrypt for password hashing
-
-**Deployment:**
-- Frontend: Vercel
-- Backend: Railway/Render/Heroku (your choice)
+- **React 18**: Modern React with hooks for state management and component architecture
+- **Create React App**: Zero-configuration setup and build tooling
+- **CSS3**: Custom gradient styling with smooth animations and responsive design
 - **JavaScript ES6+**: Modern JavaScript features and syntax
 - **Wordnik API**: External API integration for intelligent hint generation
 - **Vercel Serverless Functions**: Secure backend API endpoints for external service integration
