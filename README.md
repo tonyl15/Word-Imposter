@@ -60,6 +60,34 @@ A React-based social deduction party game where players try to identify the impo
 
 5. Open `http://localhost:3000` to play!
 
+### Hint Service: Mock vs Real
+
+Control imposter hints during development using environment variables in a `.env.local` file (Create React App loads these at startup):
+
+- `REACT_APP_USE_HINT_MOCK=true` → Use mock hints (no external API calls)
+- `REACT_APP_USE_HINT_MOCK=false` → Use real hints via backend → Wordnik
+- If `REACT_APP_USE_HINT_MOCK` is not set, mock defaults to ON in development, OFF otherwise
+
+Also set your backend URL if needed:
+
+- `REACT_APP_API_URL=http://localhost:5000`
+
+After changing `.env.local`, restart the frontend dev server for changes to apply.
+
+Example `.env.local`:
+
+```
+REACT_APP_USE_HINT_MOCK=true
+REACT_APP_API_URL=http://localhost:5000
+```
+
+Switch to real hints:
+
+```
+REACT_APP_USE_HINT_MOCK=false
+REACT_APP_API_URL=http://localhost:5000
+```
+
 ### Guest Play
 - No account required to play
 - Create an account anytime via the Sign Up button in the header
