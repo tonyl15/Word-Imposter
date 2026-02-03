@@ -9,7 +9,9 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "deploy": "vercel --prod"
+    "deploy": "vercel --prod",
+    "dev": "concurrently \"npm start\" \"npm run backend\"",
+    "backend": "cd backend && npm run dev"
   },
   "dependencies": {
     "axios": "^1.13.4",
@@ -36,6 +38,7 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.4.22",
+    "concurrently": "^9.2.1",
     "postcss": "^8.5.6"
   }
 }

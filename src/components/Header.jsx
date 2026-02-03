@@ -8,7 +8,6 @@ export default function Header() {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
   };
 
   const handleViewProfile = () => {
@@ -21,6 +20,14 @@ export default function Header() {
     console.log('Create dictionary clicked');
   };
 
+  const handleSignUp = () => {
+    navigate('/signup');
+  };
+
+  const handleLogin = () => {
+    navigate('/login');
+  };
+
   return (
     <header style={styles.header}>
       <div style={styles.container}>
@@ -29,31 +36,55 @@ export default function Header() {
         </div>
 
         <div style={styles.userSection}>
-          {user && <span style={styles.username}>Welcome, {user.username}!</span>}
-          
-          <button 
-            onClick={handleViewProfile}
-            style={{...styles.button, ...styles.buttonSecondary}}
-            title="View your profile"
-          >
-            Profile
-          </button>
+          {user ? (
+            <>
+              <span style={styles.username}>Welcome, {user.username}!</span>
+              
+              <button 
+                onClick={handleViewProfile}
+                style={{...styles.button, ...styles.buttonSecondary}}
+                title="View your profile"
+              >
+                Profile
+              </button>
 
-          <button 
-            onClick={handleCreateDictionary}
-            style={{...styles.button, ...styles.buttonSecondary}}
-            title="Create a custom dictionary"
-          >
-            Dictionary
-          </button>
+              <button 
+                onClick={handleCreateDictionary}
+                style={{...styles.button, ...styles.buttonSecondary}}
+                title="Create a custom dictionary"
+              >
+                Dictionary
+              </button>
 
-          <button 
-            onClick={handleLogout}
-            style={{...styles.button, ...styles.buttonDanger}}
-            title="Logout"
-          >
-            Logout
-          </button>
+              <button 
+                onClick={handleLogout}
+                style={{...styles.button, ...styles.buttonDanger}}
+                title="Logout"
+              >
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <span style={styles.guestText}>Playing as Guest</span>
+              
+              <button 
+                onClick={handleSignUp}
+                style={{...styles.button, ...styles.buttonPrimary}}
+                title="Create an account"
+              >
+                Sign Up
+              </button>
+
+              <button 
+                onClick={handleLogin}
+                style={{...styles.button, ...styles.buttonSecondary}}
+                title="Login to your account"
+              >
+                Login
+              </button>
+            </>
+          )}
         </div>
       </div>
     </header>
@@ -97,6 +128,11 @@ const styles = {
     fontSize: '14px',
     fontWeight: '500'
   },
+  guestText: {
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: '14px',
+    fontWeight: '500'
+  },
   button: {
     padding: '8px 16px',
     border: 'none',
@@ -107,18 +143,16 @@ const styles = {
     transition: 'all 0.2s ease',
     whiteSpace: 'nowrap'
   },
+  buttonPrimary: {
+    backgroundColor: '#28a745',
+    color: 'white'
+  },
   buttonSecondary: {
     backgroundColor: 'rgba(255,255,255,0.2)',
     color: 'white'
   },
-  buttonSecondaryHover: {
-    backgroundColor: 'rgba(255,255,255,0.3)'
-  },
   buttonDanger: {
     backgroundColor: '#dc3545',
     color: 'white'
-  },
-  buttonDangerHover: {
-    backgroundColor: '#c82333'
   }
 };

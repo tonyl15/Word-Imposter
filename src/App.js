@@ -190,14 +190,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
-          <Route 
-            path="/game" 
-            element={
-              <ProtectedRoute>
-                <GameApp />
-              </ProtectedRoute>
-            } 
-          />
+          <Route path="/game" element={<GameApp />} />
           <Route path="/" element={<Navigate to="/game" />} />
         </Routes>
       </AuthProvider>
