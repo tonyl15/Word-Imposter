@@ -43,7 +43,16 @@ export async function getWordHint(word) {
     );
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
+      let errorData = {};
+      try {
+        errorData = await response.json();
+      } catch (e) {
+        try {
+          const text = await response.text();
+          errorData = { error: text };
+        } catch {}
+      }
+      console.warn('[hintService] non-OK response. payload:', errorData);
       return { 
         hint: null, 
         error: errorData.error || `HTTP ${response.status}: ${response.statusText}` 
@@ -55,6 +64,7 @@ export async function getWordHint(word) {
     if (data.success && data.hint) {
       return { hint: data.hint, error: null };
     } else {
+      console.warn('[hintService] success response but no hint. message:', data.error);
       return { hint: null, error: 'No hint found for this word' };
     }
 
@@ -79,9 +89,11 @@ export async function isHintServiceAvailable() {
   
   try {
     const base = API_BASE_URL || '';
-    const response = await fetch(`${base}/api/related-words?word=test`);
+    const url = `${base}/api/related-words?word=test`;
+    const response = await fetch(url);
     return response.status !== 404; // API exists even if it fails with test word
   } catch (error) {
+    console.warn('[hintService] availability check failed:', error);
     return false;
   }
 }
